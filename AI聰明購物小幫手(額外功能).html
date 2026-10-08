@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AI 聰明購物小幫手｜教學版網頁原型</title>
+<style>
+:root{
+  --bg:#f6f8fb; --card:#fff; --text:#1f2937; --muted:#64748b; --line:#dbe3ef;
+  --pri:#2563eb; --pri2:#1d4ed8; --ok:#16a34a; --warn:#f59e0b; --bad:#dc2626;
+  --food:#8b5cf6; --veg:#22c55e; --life:#06b6d4; --snack:#f97316; --back:#64748b;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;background:linear-gradient(180deg,#eef5ff,#f8fafc 260px);color:var(--text)}
+header{padding:26px 20px 18px;text-align:center}
+h1{margin:0 0 8px;font-size:clamp(28px,4vw,46px)}
+header p{margin:0;color:var(--muted)}
+.wrap{max-width:1180px;margin:auto;padding:0 18px 40px}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:14px 0 20px}
+.tab{border:0;padding:12px 18px;border-radius:999px;background:#e7edf7;color:#334155;font-weight:800;cursor:pointer}
+.tab.active{background:var(--pri);color:white}
+.panel{display:none}.panel.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.card{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+.card h2,.card h3{margin-top:0}
+.col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}
+@media(max-width:850px){.col-8,.col-6,.col-4{grid-column:span 12}}
+.step{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.step:last-child{border-bottom:0}
+.badge{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#dbeafe;color:#1d4ed8;font-weight:900;flex:none}
+button{font:inherit}
+.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;background:#e8eef8;color:#1e293b}
+.btn.primary{background:var(--pri);color:white}.btn.primary:hover{background:var(--pri2)}
+.btn.ok{background:#dcfce7;color:#166534}.btn.warn{background:#fff7ed;color:#9a3412}.btn.danger{background:#fee2e2;color:#991b1b}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.field{display:grid;gap:6px;margin:10px 0}
+input[type=number]{width:180px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:16px}
+label.chk{display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.training{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media(max-width:900px){.training{grid-template-columns:repeat(2,1fr)}}
+.trainBox{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fbfdff}
+.trainBox strong{display:block;margin-bottom:8px}
+.count{font-size:26px;font-weight:900;margin:6px 0}
+.price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:800px){.price-grid{grid-template-columns:repeat(2,1fr)}}
+.price{padding:12px;border-radius:14px;border:1px solid var(--line)}
+.price input{width:100%;margin-top:6px}
+.recogBtns{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media(max-width:850px){.recogBtns{grid-template-columns:repeat(2,1fr)}}
+.recog{min-height:72px;border:2px solid transparent;border-radius:14px;color:white;font-weight:900;cursor:pointer}
+.recog.food{background:var(--food)}.recog.veg{background:var(--veg)}.recog.life{background:var(--life)}.recog.snack{background:var(--snack)}.recog.back{background:var(--back)}
+.progressWrap{display:flex;align-items:center;gap:16px}
+.ring{--p:0;width:104px;height:104px;border-radius:50%;background:conic-gradient(var(--ok) calc(var(--p)*1%),#e5e7eb 0);display:grid;place-items:center;position:relative;flex:none}
+.ring:after{content:"";width:76px;height:76px;border-radius:50%;background:white;position:absolute}
+.ring span{position:relative;z-index:1;font-weight:900;font-size:18px}
+.status{font-size:18px;font-weight:800}
+.statGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.stat b{display:block;font-size:25px}
+.cart{width:100%;border-collapse:collapse}
+.cart th,.cart td{padding:10px;border-bottom:1px solid var(--line);text-align:left}
+.cart th{color:#475569;background:#f8fafc}
+.notice{border-radius:14px;padding:12px 14px;margin-top:10px}
+.notice.info{background:#eff6ff;color:#1e40af}.notice.ok{background:#ecfdf5;color:#166534}.notice.warn{background:#fff7ed;color:#9a3412}.notice.bad{background:#fef2f2;color:#991b1b}
+.small{font-size:13px;color:var(--muted)}
+.pill{display:inline-block;padding:4px 9px;border-radius:999px;background:#eef2ff;color:#3730a3;font-weight:700;margin:2px}
+footer{text-align:center;color:var(--muted);font-size:13px;margin-top:22px}
+
+.tab.optional{
+  background:#fff7ed;
+  color:#9a3412;
+  border:1px dashed #fdba74;
+}
+.tab.optional.active{
+  background:#f97316;
+  color:white;
+  border-style:solid;
+}
+input[type=file]{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fff;
+}
+
+
+.model-upload-card{
+  max-width:900px;
+  width:100%;
+  margin:0 auto;
+}
+.model-actions{
+  margin-top:12px;
+  margin-bottom:12px;
+}
+.model-class-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:12px;
+  margin-top:12px;
+}
+.model-class-item{
+  min-height:92px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#f8fafc;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  text-align:center;
+  font-size:24px;
+  padding:12px;
+}
+.model-class-item b{
+  font-size:15px;
+  line-height:1.35;
+}
+#model .field{
+  margin:16px 0;
+}
+#model input[type=file]{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-height:48px;
+  padding:12px;
+}
+#model .notice{
+  line-height:1.65;
+}
+@media(max-width:850px){
+  .model-class-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:520px){
+  .model-class-grid{grid-template-columns:1fr}
+  .model-actions{flex-direction:column;align-items:stretch}
+  .model-actions .btn{width:100%}
+}
+
+
+.sample-actions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+  margin-top:10px;
+}
+.sample-actions .btn{
+  width:100%;
+}
+
+
+.smart-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin:14px 0;
+}
+.smart-box{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+  background:#f8fafc;
+}
+.smart-title{
+  font-weight:800;
+  margin-bottom:8px;
+}
+.smart-value{
+  text-align:right;
+  font-size:14px;
+  font-weight:900;
+  margin-top:5px;
+}
+.meter{
+  height:12px;
+  border-radius:999px;
+  background:#e5e7eb;
+  overflow:hidden;
+}
+.meter-fill{
+  width:0%;
+  height:100%;
+  border-radius:999px;
+  background:var(--pri);
+  transition:width .25s ease;
+}
+.meter-fill.good{background:var(--ok)}
+.meter-fill.snack{background:var(--warn)}
+.score-circle{
+  width:130px;
+  height:130px;
+  margin:10px auto;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:conic-gradient(var(--pri) 0%, #e5e7eb 0);
+  position:relative;
+}
+.score-circle::after{
+  content:"";
+  position:absolute;
+  width:96px;
+  height:96px;
+  border-radius:50%;
+  background:white;
+}
+.score-circle span{
+  position:relative;
+  z-index:1;
+  font-size:34px;
+  font-weight:900;
+}
+.score-label{
+  text-align:center;
+  font-weight:900;
+  font-size:18px;
+}
+.score-detail{
+  display:grid;
+  gap:10px;
+}
+.score-detail > div{
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#f8fafc;
+}
+@media(max-width:850px){
+  .smart-grid{grid-template-columns:1fr}
+}
+
+</style>
+</head>
+<body>
+<header>
+  <h1>🛒 AI 聰明購物小幫手</h1>
+  <p>115 年貓咪盃｜國中 AI 智慧生活組｜教學版網頁原型</p>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab active" data-tab="intro">① 情境與流程</button>
+    <button class="tab" data-tab="guide">② 操作說明</button>
+    <button class="tab" data-tab="setup">③ 購物設定</button>
+    <button class="tab" data-tab="shop">④ 開始購物</button>
+    <button class="tab" data-tab="checkout">⑤ 結帳分析</button>
+    <button class="tab optional" data-tab="model">載入／下載模型（選用）</button>
+    <button class="tab optional" data-tab="train">AI 訓練／模型維護（選用）</button>
+  </div>
+
+  <section id="intro" class="panel active">
+    <div class="grid">
+      <div class="card col-12">
+        <h2>題目情境</h2>
+        <p>逛商店時，使用者可能不小心買太多、超出預算，也可能買了很多「想要」卻漏掉真正「需要」的商品。這個系統會幫忙記錄購物內容、累計金額，並在結帳時檢查預算與必買類別。</p>
+      </div>
+      <div class="card col-6">
+        <h3>五個 AI 類別</h3>
+        <p><span class="pill">主食</span><span class="pill">蔬果</span><span class="pill">生活用品</span><span class="pill">零食／非必要商品</span><span class="pill">背景</span></p>
+        <p class="small">背景類別用來判斷「卡片已移開」，並解鎖下一次加入。</p>
+      </div>
+      <div class="card col-6">
+        <h3>主要購物流程</h3>
+        <div class="step"><span class="badge">1</span>設定預算與至少三項必買類別</div>
+        <div class="step"><span class="badge">2</span>出示商品圖卡，經穩定確認後加入購物車</div>
+        <div class="step"><span class="badge">3</span>移開圖卡、辨識背景後解鎖下一件</div>
+        <div class="step"><span class="badge">4</span>結帳檢查預算與必買類別並提出建議</div>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="guide" class="panel">
+    <div class="grid">
+      <div class="card col-12">
+        <h2>操作說明</h2>
+        <p>學生實際操作購物時，只需要理解「設定 → 辨識 → 加入購物車 → 背景解鎖 → 結帳分析」這條主流程。</p>
+      </div>
+
+      <div class="card col-6">
+        <h3>步驟 1｜設定購物條件</h3>
+        <div class="step"><span class="badge">1</span>設定購物預算。</div>
+        <div class="step"><span class="badge">2</span>勾選至少三項「必買商品類別」。</div>
+        <div class="step"><span class="badge">3</span>確認四個商品類別的單價。</div>
+      </div>
+
+      <div class="card col-6">
+        <h3>步驟 2｜開始購物與穩定辨識</h3>
+        <div class="step"><span class="badge">1</span>出示商品圖卡。</div>
+        <div class="step"><span class="badge">2</span>系統每 0.5 秒判斷一次，連續 5 次相同才確認。</div>
+        <div class="step"><span class="badge">3</span>確認後加入購物車並累計總金額。</div>
+        <div class="notice ok">進度環跑滿才代表 AI 已穩定確認。</div>
+      </div>
+
+      <div class="card col-6">
+        <h3>步驟 3｜背景解鎖與下一件商品</h3>
+        <div class="step"><span class="badge">1</span>商品加入後，系統進入鎖定狀態。</div>
+        <div class="step"><span class="badge">2</span>同一張卡持續出示，不會重複加入。</div>
+        <div class="step"><span class="badge">3</span>移開圖卡，辨識到「背景」後解鎖。</div>
+        <div class="step"><span class="badge">4</span>解鎖後才能加入下一件商品。</div>
+      </div>
+
+      <div class="card col-6">
+        <h3>步驟 4｜誤判修正</h3>
+        <div class="step"><span class="badge">1</span>短暫誤判未達穩定門檻，不會加入。</div>
+        <div class="step"><span class="badge">2</span>若真的加入錯誤，可按「刪除最後一筆」。</div>
+        <div class="step"><span class="badge">3</span>刪除後總金額同步扣回。</div>
+      </div>
+
+      <div class="card col-12">
+        <h3>步驟 5｜完成購物並結帳分析</h3>
+        <div class="step"><span class="badge">1</span>進入「結帳分析」。</div>
+        <div class="step"><span class="badge">2</span>檢查是否超出預算。</div>
+        <div class="step"><span class="badge">3</span>檢查必買類別是否全部買齊。</div>
+        <div class="step"><span class="badge">4</span>依不同結果提供不同建議。</div>
+      </div>
+
+      <div class="card col-12">
+        <h3>學生要記住的主要流程</h3>
+        <p style="font-size:18px;font-weight:800;text-align:center;line-height:1.9">
+          購物設定 → 出示商品 → 穩定確認 → 加入購物車 →
+          背景解鎖 → 下一件商品 → 結帳分析
+        </p>
+        <div class="notice info"><b>載入／下載模型：</b>只有程式剛啟動、模型尚未載入時才需要。</div>
+        <div class="notice warn"><b>AI 訓練／模型維護：</b>只有新增或調整辨識內容、改善模型，或評審要求展示訓練過程時才需要。</div>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="model" class="panel">
+    <div class="grid">
+      <div class="card col-12">
+        <h2>載入／下載模型（選用）</h2>
+        <p>這個功能不是主要購物流程的一部分。需要還原既有模型時可載入 JSON；需要保存目前模型資料時可下載 JSON。</p>
+        <div class="notice info">平常操作流程仍是：購物設定 → 開始購物 → 結帳分析。</div>
+      </div>
+
+      <div class="card col-12 model-upload-card">
+        <h3>① 載入已訓練完成的模型</h3>
+        <p>選擇事先保存好的 ML2Scratch <b>.json</b> 學習資料，模擬還原目前使用的模型。</p>
+        <div class="field">
+          <label for="jsonFile"><b>選擇學習資料檔案</b></label>
+          <input id="jsonFile" type="file" accept=".json,application/json">
+        </div>
+        <div class="row model-actions">
+          <button class="btn primary" onclick="loadModel()">載入 JSON</button>
+          <button class="btn" onclick="clearModel()">清除載入狀態</button>
+        </div>
+        <div id="modelState" class="notice warn">尚未載入 AI 學習資料。</div>
+      </div>
+
+      <div class="card col-12 model-upload-card">
+        <h3>② 下載目前模型資料</h3>
+        <p>可將目前使用中的模型資料下載為 JSON，作為備份或下次還原使用。</p>
+        <div class="row model-actions">
+          <button class="btn ok" onclick="downloadCurrentModel()">下載目前模型 JSON</button>
+        </div>
+        <div id="downloadState" class="notice info">若曾載入 JSON，將優先下載目前載入的資料；若尚未載入，則會下載教學版目前的模型設定與樣本數資料。</div>
+      </div>
+
+      <div class="card col-12">
+        <h3>③ 模型應包含的 5 個類別</h3>
+        <div class="model-class-grid">
+          <div class="model-class-item">🍚<b>主食</b></div>
+          <div class="model-class-item">🥦<b>蔬果</b></div>
+          <div class="model-class-item">🧻<b>生活用品</b></div>
+          <div class="model-class-item">🍪<b>零食／非必要商品</b></div>
+          <div class="model-class-item">⬜<b>背景</b></div>
+        </div>
+      </div>
+
+      <div class="card col-12">
+        <h3>④ 何時會用到這個功能？</h3>
+        <div class="step"><span class="badge">A</span>程式剛啟動，需要還原已訓練完成的模型。</div>
+        <div class="step"><span class="badge">B</span>完成新的訓練或補樣本後，需要保存目前模型資料。</div>
+        <div class="step"><span class="badge">C</span>評審要確認模型如何載入、備份與還原。</div>
+        <div class="notice ok">模型載入完成後，就可直接進入「購物設定」與「開始購物」。</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="setup" class="panel">
+    <div class="grid">
+      <div class="card col-6">
+        <h2>購物預算</h2>
+        <div class="field">
+          <label>預算金額（元）</label>
+          <input id="budget" type="number" min="1" value="500">
+        </div>
+      </div>
+      <div class="card col-6">
+        <h2>至少三項必買類別</h2>
+        <div class="row">
+          <label class="chk"><input class="must" type="checkbox" value="主食" checked> 主食</label>
+          <label class="chk"><input class="must" type="checkbox" value="蔬果" checked> 蔬果</label>
+          <label class="chk"><input class="must" type="checkbox" value="生活用品" checked> 生活用品</label>
+          <label class="chk"><input class="must" type="checkbox" value="零食／非必要商品"> 零食／非必要商品</label>
+        </div>
+        <div id="mustWarn" class="notice info">目前已選 3 類，可開始。</div>
+      </div>
+      <div class="card col-12">
+        <h2>各類別單價</h2>
+        <div class="price-grid">
+          <div class="price"><b>主食</b><input id="p-food" type="number" min="1" value="60"></div>
+          <div class="price"><b>蔬果</b><input id="p-veg" type="number" min="1" value="50"></div>
+          <div class="price"><b>生活用品</b><input id="p-life" type="number" min="1" value="80"></div>
+          <div class="price"><b>零食／非必要商品</b><input id="p-snack" type="number" min="1" value="40"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="train" class="panel">
+    <div class="card">
+      <h2>AI 訓練／模型維護（選用）</h2>
+      <p>此頁不是正式購物流程的必要步驟。只有在「新增／調整辨識內容」、「辨識效果需要改善」，或「評審要確認訓練過程」時使用。每一類都可選擇逐張手動取樣，或一次連續取樣 20 筆。</p>
+      <div class="notice info">正式使用時可直接在「載入 AI 模型」頁上傳已訓練完成的 JSON，再進入購物流程。</div>
+      <div class="training">
+        <div class="trainBox">
+          <strong>主食</strong>
+          <div class="count" id="c-food">0</div>
+          <div class="sample-actions">
+            <button class="btn" onclick="sampleManual('food')">手動取樣 +1</button>
+            <button class="btn primary" onclick="sampleContinuous('food')">連續取樣 +20</button>
+          </div>
+        </div>
+        <div class="trainBox">
+          <strong>蔬果</strong>
+          <div class="count" id="c-veg">0</div>
+          <div class="sample-actions">
+            <button class="btn" onclick="sampleManual('veg')">手動取樣 +1</button>
+            <button class="btn primary" onclick="sampleContinuous('veg')">連續取樣 +20</button>
+          </div>
+        </div>
+        <div class="trainBox">
+          <strong>生活用品</strong>
+          <div class="count" id="c-life">0</div>
+          <div class="sample-actions">
+            <button class="btn" onclick="sampleManual('life')">手動取樣 +1</button>
+            <button class="btn primary" onclick="sampleContinuous('life')">連續取樣 +20</button>
+          </div>
+        </div>
+        <div class="trainBox">
+          <strong>零食／非必要</strong>
+          <div class="count" id="c-snack">0</div>
+          <div class="sample-actions">
+            <button class="btn" onclick="sampleManual('snack')">手動取樣 +1</button>
+            <button class="btn primary" onclick="sampleContinuous('snack')">連續取樣 +20</button>
+          </div>
+        </div>
+        <div class="trainBox">
+          <strong>背景</strong>
+          <div class="count" id="c-back">0</div>
+          <div class="sample-actions">
+            <button class="btn" onclick="sampleManual('back')">手動取樣 +1</button>
+            <button class="btn primary" onclick="sampleContinuous('back')">連續取樣 +20</button>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn danger" onclick="resetSamples()">重置全部樣本</button>
+        <span id="trainState" class="small">尚未完成五類訓練。</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="shop" class="panel">
+    <div class="grid">
+      <div class="card col-12">
+        <h2>模擬 AI 辨識</h2>
+        <p>先點一個類別，系統會模擬「每 0.5 秒辨識一次、連續 5 次才確認」。</p>
+        <div class="recogBtns">
+          <button class="recog food" onclick="startRecognize('主食')">🍚 主食</button>
+          <button class="recog veg" onclick="startRecognize('蔬果')">🥦 蔬果</button>
+          <button class="recog life" onclick="startRecognize('生活用品')">🧻 生活用品</button>
+          <button class="recog snack" onclick="startRecognize('零食／非必要商品')">🍪 零食／非必要</button>
+          <button class="recog back" onclick="startRecognize('背景')">⬜ 背景／移開卡片</button>
+        </div>
+      </div>
+
+      <div class="card col-4">
+        <h3>辨識狀態</h3>
+        <div class="progressWrap">
+          <div class="ring" id="ring" style="--p:0"><span id="ringText">0/5</span></div>
+          <div>
+            <div id="status" class="status">待機</div>
+            <div id="detected" class="small">尚未辨識</div>
+          </div>
+        </div>
+        <div id="lockMsg" class="notice info">目前可加入商品。</div>
+      </div>
+
+      <div class="card col-8">
+        <h3>購物狀態</h3>
+        <div class="statGrid">
+          <div class="stat">預算<b id="sBudget">$500</b></div>
+          <div class="stat">目前總額<b id="sTotal">$0</b></div>
+          <div class="stat">剩餘<b id="sRemain">$500</b></div>
+        </div>
+
+        <div class="smart-grid">
+          <div class="smart-box">
+            <div class="smart-title">💰 預算使用率</div>
+            <div class="meter"><div id="budgetBar" class="meter-fill"></div></div>
+            <div id="budgetPercent" class="smart-value">0%</div>
+          </div>
+
+          <div class="smart-box">
+            <div class="smart-title">✅ 必買完成度</div>
+            <div class="meter"><div id="mustBar" class="meter-fill good"></div></div>
+            <div id="mustProgress" class="smart-value">0 / 3</div>
+          </div>
+
+          <div class="smart-box">
+            <div class="smart-title">🍪 非必要商品比例</div>
+            <div class="meter"><div id="snackBar" class="meter-fill snack"></div></div>
+            <div id="snackRatio" class="smart-value">0%</div>
+          </div>
+        </div>
+
+        <div id="mustStatus" class="notice info">必買類別尚未開始完成。</div>
+        <div id="liveAdvice" class="notice info">請出示商品圖卡。</div>
+      </div>
+
+      <div class="card col-12">
+        <div class="row" style="justify-content:space-between">
+          <h3 style="margin:0">購物車</h3>
+          <div class="row">
+            <button class="btn warn" onclick="smartDeleteAdvice()">智慧刪除建議</button>
+            <button class="btn danger" onclick="deleteLast()">刪除最後一筆</button>
+          </div>
+        </div>
+        <table class="cart">
+          <thead><tr><th>#</th><th>類別</th><th>單價</th></tr></thead>
+          <tbody id="cartBody"></tbody>
+        </table>
+        <p id="emptyCart" class="small">購物車目前是空的。</p>
+        <div id="deleteAdvice" class="notice info" style="display:none"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="checkout" class="panel">
+    <div class="grid">
+      <div class="card col-12">
+        <h2>結帳分析</h2>
+        <p>系統會同時檢查預算、必買完成度與非必要商品比例，並計算「聰明購物指數」。</p>
+        <button class="btn primary" onclick="checkout()">完成購物・分析</button>
+        <div id="result" class="notice info">按下按鈕後開始分析。</div>
+      </div>
+
+      <div class="card col-4">
+        <h3>🏆 聰明購物指數</h3>
+        <div class="score-circle"><span id="smartScore">--</span></div>
+        <div id="scoreLevel" class="score-label">等待分析</div>
+      </div>
+
+      <div class="card col-8">
+        <h3>分析明細</h3>
+        <div id="scoreDetail" class="score-detail">
+          <div>預算控制：尚未分析</div>
+          <div>必買完成：尚未分析</div>
+          <div>非必要商品：尚未分析</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>教學原型：主要購物流程為「購物設定 → 商品辨識 → 購物車 → 結帳分析」；模型載入與 AI 訓練皆屬系統準備／維護功能。</footer>
+</div>
+
+<script>
+const keyMap = {
+  '主食':'food','蔬果':'veg','生活用品':'life','零食／非必要商品':'snack','背景':'back'
+};
+const priceIds = {'主食':'p-food','蔬果':'p-veg','生活用品':'p-life','零食／非必要商品':'p-snack'};
+let samples = {food:0,veg:0,life:0,snack:0,back:0};
+let cart = [];
+let total = 0;
+let locked = false;
+let timer = null;
+let modelLoaded = false;
+let currentModelRaw = null;
+let currentModelFileName = '';
+
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    refreshStats();
+  })
+});
+
+document.querySelectorAll('.must').forEach(x=>x.addEventListener('change', ()=>{ validateMust(); refreshStats(); }));
+['budget','p-food','p-veg','p-life','p-snack'].forEach(id=>document.getElementById(id).addEventListener('input', refreshStats));
+
+
+async function loadModel(){
+  const input = document.getElementById('jsonFile');
+  const box = document.getElementById('modelState');
+  if(!input.files || input.files.length===0){
+    box.className='notice bad';
+    box.textContent='請先選擇一個 .json 學習資料檔。';
+    modelLoaded=false;
+    return;
+  }
+
+  const file = input.files[0];
+  if(!file.name.toLowerCase().endsWith('.json')){
+    box.className='notice bad';
+    box.textContent='檔案格式不正確，請選擇 .json 檔。';
+    modelLoaded=false;
+    return;
+  }
+
+  try{
+    currentModelRaw = await file.text();
+    currentModelFileName = file.name;
+    modelLoaded=true;
+    box.className='notice ok';
+    box.innerHTML=`✅ 已載入：<b>${file.name}</b><br>目前模型資料已可供系統使用或再次下載備份。`;
+  }catch(err){
+    modelLoaded=false;
+    currentModelRaw=null;
+    currentModelFileName='';
+    box.className='notice bad';
+    box.textContent='讀取 JSON 失敗，請重新選擇檔案。';
+  }
+}
+
+function clearModel(){
+  modelLoaded=false;
+  currentModelRaw=null;
+  currentModelFileName='';
+  const input=document.getElementById('jsonFile');
+  if(input) input.value='';
+  const box=document.getElementById('modelState');
+  box.className='notice warn';
+  box.textContent='尚未載入 AI 學習資料。';
+}
+
+function downloadCurrentModel(){
+  let dataText;
+  let fileName;
+
+  if(currentModelRaw){
+    dataText = currentModelRaw;
+    fileName = currentModelFileName
+      ? currentModelFileName.replace(/\.json$/i,'') + '_目前模型.json'
+      : '目前模型資料.json';
+  }else{
+    const mockModel = {
+      type: 'teaching-prototype',
+      note: '此檔為教學版網頁模擬的目前模型資料，不等同於 ML2Scratch 真實學習資料格式。',
+      categories: [
+        {id:1, name:'主食', samples:samples.food},
+        {id:2, name:'蔬果', samples:samples.veg},
+        {id:3, name:'生活用品', samples:samples.life},
+        {id:4, name:'零食／非必要商品', samples:samples.snack},
+        {id:5, name:'背景', samples:samples.back}
+      ],
+      generatedAt: new Date().toISOString()
+    };
+    dataText = JSON.stringify(mockModel, null, 2);
+    fileName = '目前模型資料_教學版.json';
+  }
+
+  const blob = new Blob([dataText], {type:'application/json;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+
+  const box=document.getElementById('downloadState');
+  box.className='notice ok';
+  box.textContent='已下載目前模型資料：' + fileName;
+}
+
+function validateMust(){
+  const n = getMust().length;
+  const box = document.getElementById('mustWarn');
+  if(n>=3){
+    box.className='notice ok';
+    box.textContent=`目前已選 ${n} 類，可開始。`;
+  }else{
+    box.className='notice bad';
+    box.textContent=`目前只選 ${n} 類，題目要求至少三項必買類別。`;
+  }
+}
+function getMust(){
+  return [...document.querySelectorAll('.must:checked')].map(x=>x.value);
+}
+function refreshTrainingState(){
+  const done = Object.values(samples).every(v=>v>=20);
+  document.getElementById('trainState').textContent = done
+    ? '五類皆已達 20 筆。正式 Scratch 中可下載新的學習資料 JSON，之後直接載入使用。'
+    : '仍有類別未達 20 筆。';
+}
+
+function sampleManual(k){
+  samples[k] += 1;
+  document.getElementById('c-'+k).textContent = samples[k];
+  refreshTrainingState();
+}
+
+function sampleContinuous(k){
+  samples[k] += 20;
+  document.getElementById('c-'+k).textContent = samples[k];
+  refreshTrainingState();
+}
+function resetSamples(){
+  samples={food:0,veg:0,life:0,snack:0,back:0};
+  Object.keys(samples).forEach(k=>document.getElementById('c-'+k).textContent=0);
+  document.getElementById('trainState').textContent='尚未完成五類訓練。';
+}
+function startRecognize(category){
+  if(timer) clearInterval(timer);
+  let count=0;
+  const ring=document.getElementById('ring'), txt=document.getElementById('ringText');
+  document.getElementById('status').textContent='確認中…';
+  document.getElementById('detected').textContent='目前辨識：'+category;
+  ring.style.setProperty('--p',0); txt.textContent='0/5';
+  timer=setInterval(()=>{
+    count++;
+    ring.style.setProperty('--p',count*20);
+    txt.textContent=`${count}/5`;
+    if(count>=5){
+      clearInterval(timer); timer=null;
+      document.getElementById('status').textContent='✓ 已確認';
+      confirmCategory(category);
+    }
+  },500);
+}
+function confirmCategory(category){
+  if(category==='背景'){
+    locked=false;
+    document.getElementById('lockMsg').className='notice ok';
+    document.getElementById('lockMsg').textContent='已辨識到背景：系統已解鎖，可加入下一件商品。';
+    document.getElementById('liveAdvice').className='notice info';
+    document.getElementById('liveAdvice').textContent='卡片已移開，請出示下一件商品。';
+    return;
+  }
+  if(locked){
+    document.getElementById('lockMsg').className='notice warn';
+    document.getElementById('lockMsg').textContent='已鎖定：同一張卡片不會重複加入。請先移開卡片並辨識背景。';
+    return;
+  }
+  addItem(category);
+  locked=true;
+  document.getElementById('lockMsg').className='notice warn';
+  document.getElementById('lockMsg').textContent='已加入並鎖定。請先移開圖卡（辨識背景）才能加入下一件。';
+}
+function getPrice(category){
+  return Number(document.getElementById(priceIds[category]).value||0);
+}
+function addItem(category){
+  const price=getPrice(category);
+  cart.push({category,price});
+  total+=price;
+  renderCart();
+  refreshStats();
+
+  const budget=Number(document.getElementById('budget').value||0);
+  const must=getMust();
+  const bought=new Set(cart.map(x=>x.category));
+  const missing=must.filter(x=>!bought.has(x));
+  const box=document.getElementById('liveAdvice');
+  const usedPct=budget>0 ? total/budget : 0;
+
+  // 必買優先提醒 + 非必要商品提醒
+  if(category==='零食／非必要商品' && missing.length>0){
+    box.className='notice warn';
+    if(usedPct>=0.7){
+      box.textContent=`已加入非必要商品，但還缺：${missing.join('、')}。預算已使用 ${Math.round(usedPct*100)}%，建議優先購買必買品。`;
+    }else{
+      box.textContent=`已加入非必要商品。提醒：還缺 ${missing.join('、')}，建議先確認必買品。`;
+    }
+  }else if(total>budget){
+    box.className='notice bad';
+    box.textContent=`目前已超出預算 $${total-budget}，可使用「智慧刪除建議」找出優先調整項目。`;
+  }else if(usedPct>0.9){
+    box.className='notice warn';
+    box.textContent=`已加入：${category}。目前已使用 ${Math.round(usedPct*100)}% 預算，請謹慎購買。`;
+  }else{
+    box.className='notice ok';
+    box.textContent=`已加入：${category}，目前總額 $${total}。`;
+  }
+}
+function deleteLast(){
+  if(cart.length===0){
+    document.getElementById('liveAdvice').className='notice warn';
+    document.getElementById('liveAdvice').textContent='購物車沒有商品可刪除。';
+    return;
+  }
+  const item=cart.pop(); total-=item.price; renderCart(); refreshStats();
+  const advice=document.getElementById('deleteAdvice');
+  if(advice) advice.style.display='none';
+  document.getElementById('liveAdvice').className='notice info';
+  document.getElementById('liveAdvice').textContent=`已刪除最後一筆：${item.category} $${item.price}`;
+}
+function renderCart(){
+  const body=document.getElementById('cartBody'); body.innerHTML='';
+  cart.forEach((it,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${it.category}</td><td>$${it.price}</td>`;
+    body.appendChild(tr);
+  });
+  document.getElementById('emptyCart').style.display=cart.length?'none':'block';
+}
+function refreshStats(){
+  const budget=Number(document.getElementById('budget').value||0);
+  const remain=budget-total;
+  document.getElementById('sBudget').textContent='$'+budget;
+  document.getElementById('sTotal').textContent='$'+total;
+  document.getElementById('sRemain').textContent=(remain<0?'-$'+Math.abs(remain):'$'+remain);
+
+  // 1. 預算使用進度
+  const budgetPct = budget>0 ? Math.round((total/budget)*100) : 0;
+  const budgetBar = document.getElementById('budgetBar');
+  if(budgetBar){
+    budgetBar.style.width = Math.min(budgetPct,100) + '%';
+    document.getElementById('budgetPercent').textContent = budgetPct + '%';
+    if(budgetPct < 70){
+      budgetBar.style.background='var(--ok)';
+    }else if(budgetPct <= 90){
+      budgetBar.style.background='var(--warn)';
+    }else{
+      budgetBar.style.background='var(--bad)';
+    }
+  }
+
+  // 2. 必買完成度
+  const must=getMust();
+  const bought=new Set(cart.map(x=>x.category));
+  const completed=must.filter(x=>bought.has(x));
+  const missing=must.filter(x=>!bought.has(x));
+  const mustPct = must.length ? Math.round(completed.length/must.length*100) : 0;
+  const mustBar=document.getElementById('mustBar');
+  if(mustBar){
+    mustBar.style.width=mustPct+'%';
+    document.getElementById('mustProgress').textContent=`${completed.length} / ${must.length}`;
+    const mustStatus=document.getElementById('mustStatus');
+    if(must.length<3){
+      mustStatus.className='notice bad';
+      mustStatus.textContent='必買類別不足三項，請回購物設定調整。';
+    }else if(missing.length===0){
+      mustStatus.className='notice ok';
+      mustStatus.textContent='必買類別已全部完成！';
+    }else{
+      mustStatus.className='notice info';
+      mustStatus.textContent='尚未購買：'+missing.join('、');
+    }
+  }
+
+  // 3. 非必要商品比例
+  const snackTotal=cart.filter(x=>x.category==='零食／非必要商品')
+                       .reduce((sum,x)=>sum+x.price,0);
+  const snackPct=total>0 ? Math.round(snackTotal/total*100) : 0;
+  const snackBar=document.getElementById('snackBar');
+  if(snackBar){
+    snackBar.style.width=Math.min(snackPct,100)+'%';
+    document.getElementById('snackRatio').textContent=snackPct+'%';
+    snackBar.style.background = snackPct<=20 ? 'var(--ok)' :
+                                snackPct<=40 ? 'var(--warn)' : 'var(--bad)';
+  }
+}
+
+function smartDeleteAdvice(){
+  const box=document.getElementById('deleteAdvice');
+  box.style.display='block';
+
+  if(cart.length===0){
+    box.className='notice info';
+    box.textContent='購物車目前沒有商品，不需要調整。';
+    return;
+  }
+
+  const budget=Number(document.getElementById('budget').value||0);
+  const over=Math.max(0,total-budget);
+  const snacks=cart.filter(x=>x.category==='零食／非必要商品');
+
+  if(over===0){
+    const must=getMust();
+    const bought=new Set(cart.map(x=>x.category));
+    const missing=must.filter(x=>!bought.has(x));
+    if(missing.length>0 && snacks.length>0){
+      box.className='notice warn';
+      box.textContent=`目前沒有超支，但仍缺 ${missing.join('、')}。若預算有限，可先保留必買品並重新考慮 ${snacks.length} 件非必要商品。`;
+    }else{
+      box.className='notice ok';
+      box.textContent='目前在預算內，不需要刪除商品。';
+    }
+    return;
+  }
+
+  if(snacks.length===0){
+    box.className='notice warn';
+    box.textContent=`目前超出 $${over}，但購物車中沒有「零食／非必要商品」。建議重新檢查其他類別數量。`;
+    return;
+  }
+
+  let saved=0, count=0;
+  for(const item of snacks){
+    saved += item.price;
+    count++;
+    if(saved>=over) break;
+  }
+
+  if(saved>=over){
+    box.className='notice warn';
+    box.textContent=`目前超出 $${over}。建議優先移除 ${count} 件「零食／非必要商品」，可減少約 $${saved}，回到預算範圍。`;
+  }else{
+    box.className='notice bad';
+    box.textContent=`目前超出 $${over}。即使移除全部 ${snacks.length} 件非必要商品（約 $${saved}）仍不足，需再檢查其他商品。`;
+  }
+}
+
+function checkout(){
+  const budget=Number(document.getElementById('budget').value||0);
+  const must=getMust();
+  const out=total>budget;
+  const bought=new Set(cart.map(x=>x.category));
+  const missing=must.filter(x=>!bought.has(x));
+  const completed=must.filter(x=>bought.has(x));
+  const box=document.getElementById('result');
+
+  const snackTotal=cart.filter(x=>x.category==='零食／非必要商品')
+                       .reduce((sum,x)=>sum+x.price,0);
+  const snackPct=total>0 ? Math.round(snackTotal/total*100) : 0;
+
+  if(must.length<3){
+    box.className='notice bad';
+    box.innerHTML='❌ 必買類別設定不足三項，請先回「購物設定」修正。';
+    updateScore(0, '設定未完成',
+      ['預算控制：尚未評分','必買完成：設定不足三項','非必要商品：尚未評分']);
+    return;
+  }
+
+  // 聰明購物指數：預算40 + 必買40 + 非必要20
+  const budgetScore = out ? 0 : 40;
+  const mustScore = must.length ? Math.round((completed.length/must.length)*40) : 0;
+  const snackScore = snackPct<=20 ? 20 : (snackPct<=40 ? 10 : 0);
+  const score = budgetScore + mustScore + snackScore;
+
+  let level='需要調整';
+  if(score>=90) level='聰明購物高手';
+  else if(score>=75) level='購物規劃良好';
+  else if(score>=60) level='還可以更聰明';
+
+  const details=[
+    `預算控制：${out ? `超出 $${total-budget}（0/40）` : `在預算內（40/40）`}`,
+    `必買完成：${completed.length}/${must.length} 類（${mustScore}/40）`,
+    `非必要商品：${snackPct}%（${snackScore}/20）`
+  ];
+  updateScore(score, level, details);
+
+  if(!out && missing.length===0 && snackPct<=20){
+    box.className='notice ok';
+    box.innerHTML=`✅ <b>聰明購物成功！</b><br>總金額 $${total}，必買品全部完成，而且非必要商品比例為 ${snackPct}%。`;
+  }else if(!out && missing.length===0){
+    box.className='notice ok';
+    box.innerHTML=`✅ 必買品全部完成且沒有超支。<br>非必要商品占 ${snackPct}%，可以再思考是否有「想要但不一定需要」的商品。`;
+  }else if(out && missing.length===0){
+    box.className='notice warn';
+    box.innerHTML=`⚠️ 必買類別都有買齊，但超出預算 <b>$${total-budget}</b>。建議優先檢查非必要商品。`;
+  }else if(!out && missing.length>0){
+    box.className='notice warn';
+    box.innerHTML=`⚠️ 預算控制良好，但還缺：<b>${missing.join('、')}</b>。建議先補齊必買品。`;
+  }else{
+    box.className='notice bad';
+    box.innerHTML=`❌ 目前超出預算 <b>$${total-budget}</b>，而且還缺：<b>${missing.join('、')}</b>。建議先刪除非必要商品並重新安排購買順序。`;
+  }
+}
+
+function updateScore(score, level, details){
+  const scoreEl=document.getElementById('smartScore');
+  const circle=document.querySelector('.score-circle');
+  const levelEl=document.getElementById('scoreLevel');
+  const detailEl=document.getElementById('scoreDetail');
+
+  scoreEl.textContent=score;
+  circle.style.background=`conic-gradient(var(--pri) ${score}%, #e5e7eb 0)`;
+  levelEl.textContent=level;
+  detailEl.innerHTML=details.map(x=>`<div>${x}</div>`).join('');
+}
+
+validateMust(); refreshStats(); renderCart();
+</script>
+</body>
+</html>

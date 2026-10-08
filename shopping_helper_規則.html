@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛒 AI 聰明購物小幫手 - 貓咪盃國中 AI 智慧生活組</title>
+  <style>
+    :root {
+      --primary: #0984e3;
+      --secondary: #00cec9;
+      --warning: #fdcb6e;
+      --danger: #ff7675;
+      --dark: #2d3436;
+      --light: #f8f9fa;
+      --card-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    body {
+      background-color: #f1f2f6;
+      color: var(--dark);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+
+    /* 頂部橫幅 */
+    .hero {
+      background: linear-gradient(135deg, #0984e3, #6c5ce7);
+      color: white;
+      text-align: center;
+      padding: 50px 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .hero h1 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      opacity: 0.95;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: -30px auto 0;
+      padding: 0 20px;
+    }
+
+    /* 情境引導卡片 */
+    .story-card {
+      background: white;
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      border-left: 8px solid var(--warning);
+    }
+
+    .story-icon {
+      font-size: 3.8rem;
+      min-width: 70px;
+      text-align: center;
+    }
+
+    .story-text h3 {
+      font-size: 1.35rem;
+      color: #d35400;
+      margin-bottom: 6px;
+    }
+
+    /* 圖卡分類展示區 */
+    .section-title {
+      font-size: 1.5rem;
+      text-align: center;
+      margin: 35px 0 20px;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 25px;
+    }
+
+    .category-card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border-top: 5px solid var(--primary);
+    }
+
+    .category-card h4 {
+      font-size: 1.15rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .category-card ul {
+      list-style-type: none;
+      font-size: 0.92rem;
+      color: #636e72;
+    }
+
+    .category-card li {
+      margin-bottom: 5px;
+      padding-left: 18px;
+      position: relative;
+    }
+
+    .category-card li::before {
+      content: "•";
+      color: var(--primary);
+      position: absolute;
+      left: 4px;
+      font-weight: bold;
+    }
+
+    /* 任務必備功能卡 */
+    .quest-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .quest-card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      border-left: 6px solid #a29bfe;
+    }
+
+    .quest-card h4 {
+      font-size: 1.2rem;
+      color: #6c5ce7;
+      margin-bottom: 10px;
+    }
+
+    .quest-card li {
+      margin-bottom: 8px;
+      list-style-position: inside;
+      font-size: 0.95rem;
+    }
+
+    /* 互動沙盒互動區 */
+    .sandbox-card {
+      background: linear-gradient(135deg, #2d3436, #3d4a4d);
+      color: white;
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 35px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .sandbox-card h3 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      color: var(--secondary);
+    }
+
+    .sandbox-sub {
+      text-align: center;
+      font-size: 0.95rem;
+      opacity: 0.85;
+      margin-bottom: 25px;
+    }
+
+    .config-panel {
+      background: rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: center;
+      justify-content: space-around;
+    }
+
+    .config-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .config-group label {
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .config-group input[type="number"] {
+      width: 90px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #dfe6e9;
+      font-size: 1rem;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .checkboxes label {
+      margin-right: 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .shelf-area {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .scan-btn {
+      background: white;
+      color: var(--dark);
+      border: none;
+      padding: 12px 18px;
+      border-radius: 30px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      transition: all 0.2s;
+    }
+
+    .scan-btn:hover {
+      background: var(--warning);
+      transform: translateY(-2px);
+    }
+
+    .dashboard-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .dash-item {
+      text-align: center;
+    }
+
+    .dash-num {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--secondary);
+    }
+
+    .action-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .btn-checkout {
+      background: var(--secondary);
+      color: #004d40;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 30px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 30px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .feedback-box {
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 15px;
+      font-size: 1.05rem;
+      background: rgba(255,255,255,0.15);
+      border-left: 6px solid var(--secondary);
+    }
+
+    /* 避坑秘笈卡 */
+    .tips-box {
+      background: #fff3cd;
+      border-left: 8px solid #ffc107;
+      border-radius: 14px;
+      padding: 22px;
+      margin-top: 30px;
+      color: #856404;
+    }
+
+    .tips-box h4 {
+      font-size: 1.15rem;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .story-card {
+        flex-direction: column;
+        text-align: center;
+      }
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部橫幅 -->
+  <header class="hero">
+    <h1>🛒 AI 聰明購物小幫手</h1>
+    <p>臺北市 115 年度 Scratch 貓咪盃競賽【國中 AI 智慧生活組】初賽任務指南</p>
+  </header>
+
+  <div class="container">
+
+    <!-- 情境故事卡 -->
+    <div class="story-card">
+      <div class="story-icon">🛍️💸</div>
+      <div class="story-text">
+        <h3>生活情境：別讓荷包大失血！</h3>
+        <p>走進超市看到零食特價就拼命往推車丟？結果結帳時大超支，真正要買的生活用品和蔬菜反而忘了買！請用 Scratch + AI 鏡頭打造一位「理性理財神助手」，即時幫購物車算帳，管住衝動的手！</p>
+      </div>
+    </div>
+
+    <!-- 任務關卡架構 -->
+    <h2 class="section-title"><span>🎯</span> 題目要求：六大核心任務</h2>
+    <div class="quest-grid">
+      <div class="quest-card">
+        <h4>1. 建立 5 大 AI 分類模型</h4>
+        <ul>
+          <li><strong>4 種商品</strong>：主食、蔬果、生活用品、零食/非必要。</li>
+          <li><strong>1 種無商品（背景）</strong>：鏡頭前無圖卡時的狀態。</li>
+          <li>每類採集 20~30 筆多角度、不同距離樣本。</li>
+        </ul>
+      </div>
+
+      <div class="quest-card">
+        <h4>2. 購物前設定</h4>
+        <ul>
+          <li>開始前讓使用者自訂<strong>「購物預算」</strong>（例如 $500）。</li>
+          <li>自訂勾選<strong>至少 3 項「必須購買」的類別</strong>。</li>
+          <li>同一類別商品統一單價（程式內自行設定）。</li>
+        </ul>
+      </div>
+
+      <div class="quest-card">
+        <h4>3. 防手抖與防重複機制</h4>
+        <ul>
+          <li><strong>穩定判定</strong>：同一商品須停留在鏡頭前穩定 1.5~2 秒才確認計數，避免晃動誤判。</li>
+          <li><strong>移開重置</strong>：若要買兩件同類商品，圖卡<strong>必須移開回到背景</strong>後再次出示，才能計入下一件！</li>
+        </ul>
+      </div>
+
+      <div class="quest-card">
+        <h4>4. 即時購物車與結帳分析</h4>
+        <ul>
+          <li><strong>即時儀表板</strong>：顯示辨識結果、各類件數與累計金額。</li>
+          <li><strong>防呆刪除</strong>：提供刪除購物車品項/誤掃復原功能。</li>
+          <li><strong>結帳智慧建議</strong>：判斷是否超支、必買是否都買齊，並給出理性消費建議！</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 圖卡清單對照 -->
+    <h2 class="section-title"><span>🏷️</span> 大會指定圖卡清單對照</h2>
+    <div class="category-grid">
+      <div class="category-card" style="border-top-color: #e17055;">
+        <h4>🍚 主食類 (6張)</h4>
+        <p style="font-size:0.85rem; color:#888; margin-bottom:6px;">預設單價：$60/件</p>
+        <ul>
+          <li>白米飯、麵條、吐司麵包、饅頭、地瓜、燕麥片等。</li>
+        </ul>
+      </div>
+
+      <div class="category-card" style="border-top-color: #00b894;">
+        <h4>🥦 蔬果類 (6張)</h4>
+        <p style="font-size:0.85rem; color:#888; margin-bottom:6px;">預設單價：$40/件</p>
+        <ul>
+          <li>高麗菜、胡蘿蔔、花椰菜、蘋果、香蕉、番茄等。</li>
+        </ul>
+      </div>
+
+      <div class="category-card" style="border-top-color: #0984e3;">
+        <h4>🧻 生活用品類 (6張)</h4>
+        <p style="font-size:0.85rem; color:#888; margin-bottom:6px;">預設單價：$50/件</p>
+        <ul>
+          <li>捲筒衛生紙、香皂、牙刷、抽取式面紙盒等。</li>
+        </ul>
+      </div>
+
+      <div class="category-card" style="border-top-color: #fdcb6e;">
+        <h4>🍪 零食/非必要類 (6張)</h4>
+        <p style="font-size:0.85rem; color:#888; margin-bottom:6px;">預設單價：$35/件</p>
+        <ul>
+          <li>洋芋片、巧克力餅乾、綜合糖果、草莓切片蛋糕等。</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 購物車互動沙盒 -->
+    <div class="sandbox-card">
+      <h3>🎮 程式邏輯沙盒：模擬「出示圖卡與結帳診斷」</h3>
+      <p class="sandbox-sub">直接操作下方控制台，驗證你寫在 Scratch 裡的變數計算與條件邏輯是否正確！</p>
+
+      <!-- 前置設定 -->
+      <div class="config-panel">
+        <div class="config-group">
+          <label>💰 購物預算 ($):</label>
+          <input type="number" id="budgetInput" value="300" min="50" step="50" onchange="renderUI()">
+        </div>
+        <div class="config-group checkboxes">
+          <label>🎯 設定至少 3 項「必買類別」：</label>
+          <label><input type="checkbox" id="req-staple" checked onchange="renderUI()"> 主食</label>
+          <label><input type="checkbox" id="req-veg" checked onchange="renderUI()"> 蔬果</label>
+          <label><input type="checkbox" id="req-daily" checked onchange="renderUI()"> 生活用品</label>
+          <label><input type="checkbox" id="req-snack" onchange="renderUI()"> 零食</label>
+        </div>
+      </div>
+
+      <!-- 模擬出示圖卡 (貨架) -->
+      <div class="shelf-area">
+        <button class="scan-btn" onclick="scanItem('staple', 60)">📸 出示：主食 (+$60)</button>
+        <button class="scan-btn" onclick="scanItem('veg', 40)">📸 出示：蔬果 (+$40)</button>
+        <button class="scan-btn" onclick="scanItem('daily', 50)">📸 出示：生活用品 (+$50)</button>
+        <button class="scan-btn" onclick="scanItem('snack', 35)">📸 出示：零食 (+$35)</button>
+      </div>
+
+      <!-- 購物車即時面板 -->
+      <div class="dashboard-panel">
+        <div class="dash-item">
+          <div>主食件數</div>
+          <div class="dash-num" id="count-staple">0</div>
+        </div>
+        <div class="dash-item">
+          <div>蔬果件數</div>
+          <div class="dash-num" id="count-veg">0</div>
+        </div>
+        <div class="dash-item">
+          <div>生活用品件數</div>
+          <div class="dash-num" id="count-daily">0</div>
+        </div>
+        <div class="dash-item">
+          <div>零食件數</div>
+          <div class="dash-num" id="count-snack">0</div>
+        </div>
+        <div class="dash-item">
+          <div>目前總金額</div>
+          <div class="dash-num" id="total-amount">$0</div>
+        </div>
+      </div>
+
+      <!-- 控制按鈕 -->
+      <div class="action-controls">
+        <button class="btn-checkout" onclick="checkout()">🛎️ 按此結帳分析</button>
+        <button class="btn-danger" onclick="deleteLast()">🗑️ 刪除商品 (誤掃退件)</button>
+        <button class="btn-danger" style="background:#b2bec3; color:#2d3436;" onclick="clearCart()">🔄 清空購物車</button>
+      </div>
+
+      <!-- 回饋顯示 -->
+      <div class="feedback-box" id="feedback">
+        👉 請先設定預算與必買類別，再點擊上方按鈕出示商品圖卡！
+      </div>
+    </div>
+
+    <!-- 避坑指南 -->
+    <div class="tips-box">
+      <h4>⚡ 貓咪盃奪分關鍵（程式說明文件 + 作品穩定度）：</h4>
+      <p>1. <strong>防手抖與移開重置邏輯：</strong>不可使用「接收到類別立即加一件」，必須搭配「計時變數連續大於 1.5 秒＋上鎖旗標」；且必須在鏡頭偵測到「類別 5（無商品背景）」時將旗標解鎖，才能再次刷入下一件！</p>
+      <p>2. <strong>模型存檔重要提醒：</strong>ML2Scratch 訓練完後，專案檔 <code>.sb3</code> <strong>不會</strong>保存影像數據！一定要點擊積木 <code>下載學習資料</code> 匯出 <code>.json</code> 檔備份！</p>
+    </div>
+
+  </div>
+
+  <script>
+    // 購物車數據模型
+    const cart = {
+      staple: { count: 0, price: 60, name: "主食" },
+      veg:    { count: 0, price: 40, name: "蔬果" },
+      daily:  { count: 0, price: 50, name: "生活用品" },
+      snack:  { count: 0, price: 35, name: "零食/非必要" }
+    };
+    let scanHistory = []; // 用於「刪除上一筆」的記錄
+
+    // 模擬出示圖卡
+    function scanItem(type, price) {
+      cart[type].count++;
+      scanHistory.push(type);
+      renderUI();
+      document.getElementById('feedback').innerHTML = `🔍 偵測到 <strong>${cart[type].name}</strong>，已成功加入購物車！(目前總金額: $${calcTotal()})`;
+    }
+
+    // 刪除上一筆商品 (題目的「刪除商品」防呆要求)
+    function deleteLast() {
+      if (scanHistory.length === 0) {
+        alert("購物車是空的，無法刪除！");
+        return;
+      }
+      const lastItem = scanHistory.pop();
+      cart[lastItem].count--;
+      renderUI();
+      document.getElementById('feedback').innerHTML = `🗑️ 已移除 1 件 <strong>${cart[lastItem].name}</strong>！`;
+    }
+
+    // 清空重來
+    function clearCart() {
+      for (let k in cart) cart[k].count = 0;
+      scanHistory = [];
+      renderUI();
+      document.getElementById('feedback').innerHTML = `🔄 購物車已清空，請重新出示商品圖卡。`;
+    }
+
+    // 計算總金額
+    function calcTotal() {
+      return (cart.staple.count * cart.staple.price) +
+             (cart.veg.count * cart.veg.price) +
+             (cart.daily.count * cart.daily.price) +
+             (cart.snack.count * cart.snack.price);
+    }
+
+    // 結帳診斷演算法 (滿足題目的預算與必買雙重條件)
+    function checkout() {
+      const budget = parseInt(document.getElementById('budgetInput').value) || 0;
+      const total = calcTotal();
+
+      // 取得必買項目清單
+      const reqs = [];
+      if (document.getElementById('req-staple').checked) reqs.push('staple');
+      if (document.getElementById('req-veg').checked) reqs.push('veg');
+      if (document.getElementById('req-daily').checked) reqs.push('daily');
+      if (document.getElementById('req-snack').checked) reqs.push('snack');
+
+      if (reqs.length < 3) {
+        alert("題目規定：開始使用前必須勾選至少 3 項必須購買的類別喔！");
+        return;
+      }
+
+      // 檢查是否漏買必買商品
+      const missingItems = [];
+      reqs.forEach(key => {
+        if (cart[key].count === 0) {
+          missingItems.push(cart[key].name);
+        }
+      });
+
+      // 產生消費建議回饋
+      let message = `🧾 <strong>【結帳分析結果】</strong><br>`;
+      message += `• 購物總金額：$${total} 元 (預算：$${budget} 元)<br>`;
+
+      const isOverBudget = total > budget;
+      const isMissing = missingItems.length > 0;
+
+      if (!isOverBudget && !isMissing) {
+        message += `<span style="color:#55efc4; font-weight:bold;">🎉 太棒了！理性消費滿分！所有必需品皆已買齊，且完全在預算掌控內！</span>`;
+      } else {
+        if (isOverBudget) {
+          message += `<span style="color:#ff7675; font-weight:bold;">⚠️ 超出預算 $${total - budget} 元！</span> `;
+          if (cart.snack.count > 0) {
+            message += `建議先將非必要的<strong>零食（已買 ${cart.snack.count} 件）</strong>移出購物車以省下 $${cart.snack.count * cart.snack.price} 元。<br>`;
+          } else {
+            message += `請檢視採買件數並適度刪減。<br>`;
+          }
+        }
+        if (isMissing) {
+          message += `<span style="color:#fdcb6e; font-weight:bold;">❗ 提醒：設定的必買項目中，你還沒購買：【${missingItems.join('、')}】！請務必補齊必需品。</span>`;
+        }
+      }
+
+      document.getElementById('feedback').innerHTML = message;
+    }
+
+    function renderUI() {
+      document.getElementById('count-staple').innerText = cart.staple.count;
+      document.getElementById('count-veg').innerText = cart.veg.count;
+      document.getElementById('count-daily').innerText = cart.daily.count;
+      document.getElementById('count-snack').innerText = cart.snack.count;
+      document.getElementById('total-amount').innerText = `$${calcTotal()}`;
+    }
+  </script>
+</body>
+</html>

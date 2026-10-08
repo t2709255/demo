@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛒 AI 聰明購物小幫手 - 完整互動教學與訓練工作坊</title>
+  <style>
+    :root {
+      --primary: #0984e3;
+      --primary-dark: #074b83;
+      --secondary: #00cec9;
+      --accent: #fdcb6e;
+      --danger: #ff7675;
+      --dark: #2d3436;
+      --gray: #636e72;
+      --light-bg: #f5f6fa;
+      --card-bg: #ffffff;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    body {
+      background-color: var(--light-bg);
+      color: var(--dark);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    /* 頂部橫幅 */
+    .hero {
+      background: linear-gradient(135deg, #0984e3, #6c5ce7);
+      color: white;
+      text-align: center;
+      padding: 45px 20px 40px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    }
+
+    .hero h1 {
+      font-size: 2.3rem;
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      opacity: 0.95;
+    }
+
+    .container {
+      max-width: 1060px;
+      margin: -25px auto 0;
+      padding: 0 20px;
+    }
+
+    .section-box {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 25px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .section-title {
+      font-size: 1.45rem;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--dark);
+      border-bottom: 2px solid #edf2f7;
+      padding-bottom: 10px;
+    }
+
+    /* ========== 1. 情境說明動畫專區 ========== */
+    .story-anim-container {
+      background: linear-gradient(to right, #ffeaa7, #fab1a0);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .story-stage {
+      width: 100%;
+      height: 130px;
+      background: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .actor {
+      font-size: 3.5rem;
+      transition: all 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .actor span {
+      font-size: 0.85rem;
+      color: var(--dark);
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    .cart-bubble {
+      background: #fdcb6e;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+
+    .anim-caption {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #d35400;
+      min-height: 28px;
+      text-align: center;
+    }
+
+    /* ========== 2. 操作說明動畫專區 ========== */
+    .ops-anim-container {
+      background: #edf2f7;
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ops-stage {
+      width: 100%;
+      height: 160px;
+      background: #2d3436;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      color: white;
+    }
+
+    .ops-card-mock {
+      font-size: 4rem;
+      position: absolute;
+      transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .progress-bar-box {
+      position: absolute;
+      bottom: 12px;
+      width: 60%;
+      height: 10px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--secondary);
+      transition: width 0.1s linear;
+    }
+
+    .ops-status-badge {
+      position: absolute;
+      top: 12px;
+      background: rgba(0,0,0,0.6);
+      padding: 4px 14px;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    /* ========== 3 & 4. AI 訓練與鏡頭工作台 ========== */
+    .trainer-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .camera-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #1e272e;
+      border-radius: 12px;
+      padding: 14px;
+      color: white;
+    }
+
+    video {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #000;
+      transform: scaleX(-1);
+    }
+
+    canvas {
+      display: none;
+    }
+
+    .cam-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      width: 100%;
+    }
+
+    .training-classes {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .class-row {
+      background: #f8f9fa;
+      border: 1px solid #dfe6e9;
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border 0.2s;
+    }
+
+    .class-row:hover {
+      border-color: var(--primary);
+    }
+
+    .class-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+
+    .class-count {
+      background: #dfe6e9;
+      color: var(--dark);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+    }
+
+    .train-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: bold;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .train-btn:hover {
+      background: var(--primary-dark);
+      transform: scale(1.03);
+    }
+
+    .train-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* 模型匯出入區 */
+    .model-actions-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px dashed #dcdde1;
+    }
+
+    /* 按鈕共用樣式 */
+    .btn {
+      padding: 10px 18px;
+      border-radius: 25px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: var(--secondary); color: #004d40; }
+    .btn-accent { background: var(--accent); color: #856404; }
+    .btn-danger { background: var(--danger); color: white; }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    /* 購物模擬控制區 */
+    .shop-sim-box {
+      background: #2d3436;
+      color: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 15px;
+    }
+
+    .shop-sim-sub {
+      font-size: 0.9rem;
+      color: #b2bec3;
+      margin-bottom: 12px;
+    }
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+      text-align: center;
+    }
+
+    .dash-card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .dash-val {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: var(--secondary);
+    }
+
+    .report-box {
+      background: rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+      border-left: 5px solid var(--secondary);
+      font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .trainer-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <h1>🛒 AI 聰明購物小幫手</h1>
+    <p>臺北市貓咪盃【國中 AI 智慧生活組】專屬互動學習工作坊</p>
+  </header>
+
+  <div class="container">
+
+    <!-- 1. 題目情境說明動畫 -->
+    <div class="section-box">
+      <h2 class="section-title"><span>🎬</span> 1. 題目情境說明劇場</h2>
+      <div class="story-anim-container">
+        <div class="story-stage">
+          <div class="actor" id="story-buyer" style="transform: translateX(-50px);">
+            <div id="buyer-icon">🧑‍🎓</div>
+            <span>小明</span>
+          </div>
+          <div class="cart-bubble" id="story-bubble">走進大超市...看到零食好好吃！😋</div>
+          <div class="actor" id="story-shelf">
+            <div>🍪🍟🍫</div>
+            <span>零食誘惑區</span>
+          </div>
+        </div>
+        <div class="anim-caption" id="story-caption">情境 1：平時走進商店，很容易被「想要」的零食吸引放進推車...</div>
+        <button class="btn btn-primary" onclick="nextStoryScene()">▶️ 播放下一幕情境</button>
+      </div>
+    </div>
+
+    <!-- 2. 操作說明動畫 -->
+    <div class="section-box">
+      <h2 class="section-title"><span>💡</span> 2. 鏡頭辨識防手抖操作動畫演示</h2>
+      <div class="ops-anim-container">
+        <div class="ops-stage">
+          <div class="ops-status-badge" id="ops-badge">等待出示圖卡...</div>
+          <div class="ops-card-mock" id="ops-card" style="transform: translateY(180px);">🧻</div>
+          <div class="progress-bar-box">
+            <div class="progress-fill" id="ops-fill"></div>
+          </div>
+        </div>
+        <p style="font-size:0.95rem; color:#4a5568; font-weight:bold;" id="ops-desc">
+          點擊下方按鈕，觀摩圖卡如何「穩定停留 1.5 秒確認」與「移開背景重置」的防手抖機制！
+        </p>
+        <button class="btn btn-secondary" onclick="runOpsAnimation()">▶️ 演示防抖與計數邏輯</button>
+      </div>
+    </div>
+
+    <!-- 3 & 4. 自行訓練各類食物 + 模型上傳/下載 -->
+    <div class="section-box">
+      <h2 class="section-title"><span>📸</span> 3. 自行訓練五大分類模型 (WebCam 實戰)</h2>
+      <p style="font-size:0.92rem; color:var(--gray); margin-bottom:15px;">
+        啟用您的攝影機，將手邊的物品或圖卡放到鏡頭前，點擊按鈕拍攝收集樣本（每類建議 20 筆以上）！
+      </p>
+
+      <div class="trainer-layout">
+        <!-- 攝影機視窗 -->
+        <div class="camera-box">
+          <video id="webcam" autoplay playsinline muted></video>
+          <canvas id="snapshot-canvas" width="320" height="240"></canvas>
+          <div class="cam-controls">
+            <button class="btn btn-accent" style="width:100%;" onclick="toggleCamera()">📷 啟動 / 切換攝影機</button>
+          </div>
+        </div>
+
+        <!-- 訓練類別清單 -->
+        <div class="training-classes">
+          <!-- 類別 1 -->
+          <div class="class-row">
+            <div class="class-info">🍚 主食類 (單價 $60)</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="class-count" id="cnt-staple">0 筆</span>
+              <button class="train-btn" onclick="captureSample('staple')">📸 拍一張</button>
+            </div>
+          </div>
+
+          <!-- 類別 2 -->
+          <div class="class-row">
+            <div class="class-info">🥦 蔬果類 (單價 $40)</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="class-count" id="cnt-veg">0 筆</span>
+              <button class="train-btn" onclick="captureSample('veg')">📸 拍一張</button>
+            </div>
+          </div>
+
+          <!-- 類別 3 -->
+          <div class="class-row">
+            <div class="class-info">🧻 生活用品 (單價 $50)</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="class-count" id="cnt-daily">0 筆</span>
+              <button class="train-btn" onclick="captureSample('daily')">📸 拍一張</button>
+            </div>
+          </div>
+
+          <!-- 類別 4 -->
+          <div class="class-row">
+            <div class="class-info">🍪 零食/非必要 (單價 $35)</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="class-count" id="cnt-snack">0 筆</span>
+              <button class="train-btn" onclick="captureSample('snack')">📸 拍一張</button>
+            </div>
+          </div>
+
+          <!-- 類別 5 -->
+          <div class="class-row" style="background:#edf2f7;">
+            <div class="class-info">🚫 沒有商品(背景基準)</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="class-count" id="cnt-bg">0 筆</span>
+              <button class="train-btn" style="background:#636e72;" onclick="captureSample('bg')">📸 拍背景</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 模型上傳與下載 -->
+      <div class="model-actions-bar">
+        <button class="btn btn-primary" onclick="exportModelData()">💾 下載訓練模型 (.json)</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📂 上傳恢復模型 (.json)</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importModelData(event)">
+        <button class="btn btn-danger" onclick="resetTraining()">🔄 清空所有樣本</button>
+      </div>
+    </div>
+
+    <!-- 5. 購物車邏輯驗證與智慧結帳 -->
+    <div class="section-box">
+      <h2 class="section-title"><span>🛒</span> 4. 購物車模擬試算與結帳建議</h2>
+      <div class="shop-sim-box">
+        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px;">
+          <div>
+            <label style="font-weight:bold;">💰 購物預算設定：</label>
+            <input type="number" id="sim-budget" value="300" style="padding:4px 8px; border-radius:6px; width:90px; font-weight:bold;"> 元
+          </div>
+          <div style="font-size:0.9rem;">
+            <span>🎯 必買清單勾選：</span>
+            <label><input type="checkbox" id="req-c1" checked> 主食</label>
+            <label><input type="checkbox" id="req-c2" checked> 蔬果</label>
+            <label><input type="checkbox" id="req-c3" checked> 生活用品</label>
+            <label><input type="checkbox" id="req-c4"> 零食</label>
+          </div>
+        </div>
+
+        <!-- 購物車數據面板 -->
+        <div class="dash-grid">
+          <div class="dash-card"><div>🍚 主食</div><div class="dash-val" id="val-staple">0 件</div></div>
+          <div class="dash-card"><div>🥦 蔬果</div><div class="dash-val" id="val-veg">0 件</div></div>
+          <div class="dash-card"><div>🧻 生活用品</div><div class="dash-val" id="val-daily">0 件</div></div>
+          <div class="dash-card"><div>🍪 零食</div><div class="dash-val" id="val-snack">0 件</div></div>
+          <div class="dash-card" style="background:rgba(0,206,201,0.2);"><div>目前總金額</div><div class="dash-val" id="val-total">$0</div></div>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
+          <button class="btn btn-primary" onclick="simScan('staple')">+1 主食 ($60)</button>
+          <button class="btn btn-primary" onclick="simScan('veg')">+1 蔬果 ($40)</button>
+          <button class="btn btn-primary" onclick="simScan('daily')">+1 生活用品 ($50)</button>
+          <button class="btn btn-primary" onclick="simScan('snack')">+1 零食 ($35)</button>
+          <button class="btn btn-danger" onclick="simUndo()">🗑️ 刪除商品</button>
+          <button class="btn btn-secondary" onclick="simCheckout()">🛎️ 結帳分析</button>
+        </div>
+
+        <div class="report-box" id="sim-report">
+          👉 點選上方按鈕加入商品或進行結帳，觀察分析規則回饋！
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ====================================================
+       1. 題目情境說明劇場邏輯
+       ==================================================== */
+    let storyStep = 0;
+    const storyScenes = [
+      {
+        buyerPos: "-50px",
+        bubble: "走進大超市...看到零食好好吃！😋",
+        caption: "情境 1：平時走進商店，很容易被「想要」的零食吸引放進推車...",
+        shelf: "🍪🍟🍫",
+        shelfName: "零食誘惑區"
+      },
+      {
+        buyerPos: "50px",
+        bubble: "天啊！不知不覺花了 $500，超出預算啦！😭",
+        caption: "情境 2：結帳時荷包大失血，真正需要的米和衛生紙反而沒買到！",
+        shelf: "💸🛒⚠️",
+        shelfName: "預算超支危機"
+      },
+      {
+        buyerPos: "0px",
+        bubble: "🤖 AI 小幫手出動！即時幫你看緊預算與必買清單！",
+        caption: "情境 3：運用 AI 鏡頭辨識商品，在預算與必需品間做出理智選擇！",
+        shelf: "🤖📊✅",
+        shelfName: "AI 智慧購物管家"
+      }
+    ];
+
+    function nextStoryScene() {
+      storyStep = (storyStep + 1) % storyScenes.length;
+      const s = storyScenes[storyStep];
+      document.getElementById('story-buyer').style.transform = `translateX(${s.buyerPos})`;
+      document.getElementById('story-bubble').innerText = s.bubble;
+      document.getElementById('story-caption').innerText = s.caption;
+      document.getElementById('story-shelf').children[0].innerText = s.shelf;
+      document.getElementById('story-shelf').children[1].innerText = s.shelfName;
+    }
+
+    /* ====================================================
+       2. 操作說明動畫邏輯
+       ==================================================== */
+    let isOpsAnimating = false;
+    function runOpsAnimation() {
+      if (isOpsAnimating) return;
+      isOpsAnimating = true;
+
+      const card = document.getElementById('ops-card');
+      const fill = document.getElementById('ops-fill');
+      const badge = document.getElementById('ops-badge');
+      const desc = document.getElementById('ops-desc');
+
+      // 步驟 1: 出示圖卡
+      badge.innerText = "🔍 偵測到圖卡：生活用品 (衛生紙)";
+      desc.innerText = "步驟 1：圖卡進入鏡頭，系統辨識到類別，開始「防抖穩定計時」...";
+      card.style.transform = "translateY(0px)";
+      fill.style.width = "0%";
+
+      // 步驟 2: 計時條累加 (1.5秒)
+      let progress = 0;
+      const timer = setInterval(() => {
+        progress += 7;
+        fill.style.width = `${Math.min(progress, 100)}%`;
+        if (progress >= 100) {
+          clearInterval(timer);
+          // 步驟 3: 確認加入上鎖
+          badge.innerText = "✅ 穩定停留滿 1.5 秒：成功加入購物車！";
+          desc.innerText = "步驟 2：確認計數！此時「已確認」旗標上鎖，防止在鏡頭前持續停留而重複連刷。";
+
+          setTimeout(() => {
+            // 步驟 4: 移開回到背景
+            badge.innerText = "🚫 圖卡移開：回到「背景」狀態";
+            desc.innerText = "步驟 3：圖卡移開回到背景後，旗標解鎖！此時若再拿出來，才能計為下一件！";
+            card.style.transform = "translateY(180px)";
+            fill.style.width = "0%";
+            setTimeout(() => {
+              badge.innerText = "等待出示下一件圖卡...";
+              isOpsAnimating = false;
+            }, 1000);
+          }, 1200);
+        }
+      }, 100);
+    }
+
+    /* ====================================================
+       3 & 4. 攝影機取樣與模型訓練/下載邏輯
+       ==================================================== */
+    let videoStream = null;
+    const modelData = {
+      staple: [],
+      veg: [],
+      daily: [],
+      snack: [],
+      bg: []
+    };
+
+    async function toggleCamera() {
+      const video = document.getElementById('webcam');
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+        videoStream = null;
+        return;
+      }
+
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 320, height: 240 }
+        });
+        video.srcObject = videoStream;
+      } catch (err) {
+        alert("無法啟動攝影機，請檢查瀏覽器權限或鏡頭連接！");
+      }
+    }
+
+    function captureSample(category) {
+      const video = document.getElementById('webcam');
+      const canvas = document.getElementById('snapshot-canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!videoStream) {
+        modelData[category].push({ simulated: true, timestamp: Date.now() });
+      } else {
+        ctx.drawImage(video, 0, 0, 320, 240);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+        modelData[category].push({ image: dataUrl, timestamp: Date.now() });
+      }
+
+      updateSampleCounts();
+    }
+
+    function updateSampleCounts() {
+      document.getElementById('cnt-staple').innerText = `${modelData.staple.length} 筆`;
+      document.getElementById('cnt-veg').innerText = `${modelData.veg.length} 筆`;
+      document.getElementById('cnt-daily').innerText = `${modelData.daily.length} 筆`;
+      document.getElementById('cnt-snack').innerText = `${modelData.snack.length} 筆`;
+      document.getElementById('cnt-bg').innerText = `${modelData.bg.length} 筆`;
+    }
+
+    function exportModelData() {
+      const jsonStr = JSON.stringify(modelData, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ShoppingHelper_ML_Model_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importModelData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          ['staple', 'veg', 'daily', 'snack', 'bg'].forEach(k => {
+            if (imported[k]) modelData[k] = imported[k];
+          });
+          updateSampleCounts();
+          alert("模型資料已成功載入！所有類別樣本已恢復。");
+        } catch (err) {
+          alert("檔案格式不正確，無法載入模型！");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetTraining() {
+      if (confirm("確定要清空所有類別已訓練的影像樣本嗎？")) {
+        for (let k in modelData) modelData[k] = [];
+        updateSampleCounts();
+      }
+    }
+
+    /* ====================================================
+       5. 購物車邏輯驗證與智慧結帳
+       ==================================================== */
+    const simCart = {
+      staple: { count: 0, price: 60, name: "主食" },
+      veg:    { count: 0, price: 40, name: "蔬果" },
+      daily:  { count: 0, price: 50, name: "生活用品" },
+      snack:  { count: 0, price: 35, name: "零食" }
+    };
+    let simHistory = [];
+
+    function simScan(type) {
+      simCart[type].count++;
+      simHistory.push(type);
+      updateSimUI();
+      document.getElementById('sim-report').innerHTML = `🔍 辨識成功：+1 件 <strong>${simCart[type].name}</strong> (單價 $${simCart[type].price})`;
+    }
+
+    function simUndo() {
+      if (simHistory.length === 0) {
+        alert("購物車是空的，無法退件！");
+        return;
+      }
+      const last = simHistory.pop();
+      simCart[last].count--;
+      updateSimUI();
+      document.getElementById('sim-report').innerHTML = `🗑️ 已刪除最後掃描的：<strong>${simCart[last].name}</strong>！`;
+    }
+
+    function calcSimTotal() {
+      return (simCart.staple.count * simCart.staple.price) +
+             (simCart.veg.count * simCart.veg.price) +
+             (simCart.daily.count * simCart.daily.price) +
+             (simCart.snack.count * simCart.snack.price);
+    }
+
+    function updateSimUI() {
+      document.getElementById('val-staple').innerText = `${simCart.staple.count} 件`;
+      document.getElementById('val-veg').innerText = `${simCart.veg.count} 件`;
+      document.getElementById('val-daily').innerText = `${simCart.daily.count} 件`;
+      document.getElementById('val-snack').innerText = `${simCart.snack.count} 件`;
+      document.getElementById('val-total').innerText = `$${calcSimTotal()}`;
+    }
+
+    function simCheckout() {
+      const budget = parseInt(document.getElementById('sim-budget').value) || 0;
+      const total = calcSimTotal();
+
+      const reqKeys = [];
+      if (document.getElementById('req-c1').checked) reqKeys.push('staple');
+      if (document.getElementById('req-c2').checked) reqKeys.push('veg');
+      if (document.getElementById('req-c3').checked) reqKeys.push('daily');
+      if (document.getElementById('req-c4').checked) reqKeys.push('snack');
+
+      if (reqKeys.length < 3) {
+        alert("規則提醒：題目要求開始前須勾選至少 3 項必須購買的類別！");
+        return;
+      }
+
+      const missing = [];
+      reqKeys.forEach(k => {
+        if (simCart[k].count === 0) missing.push(simCart[k].name);
+      });
+
+      let report = `🧾 <strong>【結帳分析報告】</strong><br>`;
+      report += `• 購物總額：$${total} 元 (預算上限：$${budget} 元)<br>`;
+
+      const isOver = total > budget;
+      const isMissing = missing.length > 0;
+
+      if (!isOver && !isMissing) {
+        report += `<span style="color:#55efc4; font-weight:bold;">🎉 完美達標！理性購物典範，在預算內買齊了所有必需品！</span>`;
+      } else {
+        if (isOver) {
+          report += `<span style="color:#ff7675; font-weight:bold;">⚠️ 超出預算 $${total - budget} 元！</span><br>`;
+          if (simCart.snack.count > 0) {
+            report += `💡 建議：先移除非必要的<strong>零食（已買 ${simCart.snack.count} 件）</strong>，可省下 $${simCart.snack.count * simCart.snack.price} 元以平衡預算。<br>`;
+          }
+        }
+        if (isMissing) {
+          report += `<span style="color:#fdcb6e; font-weight:bold;">❗ 漏買提醒：設定的必買品項中，【${missing.join('、')}】尚未購買！請補齊後再結帳。</span>`;
+        }
+      }
+      document.getElementById('sim-report').innerHTML = report;
+    }
+  </script>
+</body>
+</html>
