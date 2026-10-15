@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI 聰明購物小幫手｜互動模擬版</title>
+<style>
+:root{
+  --bg:#f4f6f8;--panel:#fff;--ink:#1f2937;--muted:#6b7280;--line:#d1d5db;
+  --accent:#2563eb;--good:#15803d;--warn:#f59e0b;--bad:#b91c1c;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:#dfe3e8;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;
+  color:var(--ink);display:flex;justify-content:center;align-items:center;min-height:100vh;padding:16px;
+}
+.app{
+  width:min(1200px,96vw);aspect-ratio:16/9;background:var(--bg);border:2px solid #aeb6c2;
+  border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.18);position:relative;
+}
+.page{position:absolute;inset:0;display:none;padding:18px 22px}.page.active{display:block}
+.header{height:52px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.title{font-size:clamp(24px,2.2vw,38px);font-weight:800;letter-spacing:.04em}
+.subtitle{color:var(--muted);margin-top:8px;font-size:clamp(14px,1.2vw,20px)}
+button{font:inherit;border:none;border-radius:12px;padding:12px 18px;cursor:pointer;background:#e5e7eb;color:var(--ink);font-weight:700}
+button.primary{background:var(--accent);color:#fff}button.good{background:var(--good);color:#fff}
+button.warn{background:var(--warn);color:#111827}button.ghost{background:#fff;border:1px solid var(--line)}
+button:disabled{opacity:.42;cursor:not-allowed}
+.home-center{height:calc(100% - 52px);display:grid;grid-template-columns:1.15fr .85fr;align-items:center;gap:32px}
+.home-actions{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:32px;max-width:620px}
+.home-actions .primary{grid-column:1/-1;font-size:1.25rem;padding:18px}
+.hero-card{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:28px;min-height:300px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.hero-icon{font-size:84px;text-align:center}.hero-card p{font-size:1.12rem;line-height:1.7;text-align:center}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+.setup-grid{height:calc(100% - 66px);display:grid;grid-template-columns:1fr 1.1fr;gap:18px}
+.setup-grid .box{display:flex;flex-direction:column;justify-content:center}
+.budget-row{display:flex;align-items:center;justify-content:center;gap:18px;margin:22px 0}
+.budget-value{font-size:2.2rem;font-weight:800;min-width:150px;text-align:center}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.cat-btn.selected{background:var(--good);color:#fff}
+.status-line{margin-top:18px;font-weight:700;color:var(--muted)}.bottom-action{margin-top:auto;display:flex;justify-content:flex-end;gap:10px}
+.shopping-layout{height:calc(100% - 62px);display:grid;grid-template-rows:auto 1fr auto auto auto;gap:10px}
+.top-info{display:flex;justify-content:space-between;gap:12px}
+.mini{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:250px;line-height:1.6}
+.camera-zone{position:relative;background:#111827;border-radius:16px;overflow:hidden;border:1px solid #111827}
+#camera,#trainingCamera{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);background:#111827}
+.camera-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#d1d5db;text-align:center;padding:20px;pointer-events:none;font-size:1.1rem}
+.scan-safe-label{position:absolute;top:10px;left:50%;transform:translateX(-50%);color:#e5e7eb;background:rgba(0,0,0,.35);padding:6px 12px;border-radius:999px;font-size:.92rem}
+.ai-bar{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.ai-status{font-weight:800}.progress{margin-top:6px;display:flex;gap:5px}.seg{width:28px;height:10px;border-radius:99px;background:#d1d5db}.seg.on{background:var(--accent)}
+.ai-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.sim-row{background:#eef2ff;border:1px dashed #a5b4fc;border-radius:12px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sim-buttons{display:flex;gap:6px;flex-wrap:wrap}.sim-buttons button{padding:8px 10px;font-size:.92rem}
+.cart-row{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.cart-summary{display:flex;gap:16px;flex-wrap:wrap;font-weight:700}
+.analysis-grid{height:calc(100% - 66px);display:grid;grid-template-columns:1fr 1fr;gap:16px}.analysis-grid .box{display:flex;flex-direction:column;gap:12px}.analysis-advice{grid-column:1/-1}
+.analysis-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:auto}
+.anim-wrap{height:calc(100% - 60px);display:flex;align-items:center;justify-content:center}
+.anim-card{width:min(780px,84%);min-height:360px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:30px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:22px}
+.anim-emoji{font-size:78px}.anim-text{font-size:1.45rem;line-height:1.7;font-weight:700}.anim-actions{display:flex;gap:10px}
+.tools-grid{height:calc(100% - 60px);display:grid;place-items:center}.tools-card{width:min(540px,90%);display:grid;gap:14px}
+.training-grid{height:calc(100% - 62px);display:grid;grid-template-columns:1fr 1fr;gap:14px}.training-cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.training-cats button.active{background:var(--accent);color:#fff}
+.training-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.note{font-size:.93rem;color:var(--muted);line-height:1.6}
+.toast{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:.2s;z-index:20}
+.toast.show{opacity:1}
+@media(max-width:800px){
+  body{padding:0}.app{width:100vw;height:100vh;aspect-ratio:auto;border-radius:0}.page{padding:12px}
+  .home-center,.setup-grid,.analysis-grid,.training-grid{grid-template-columns:1fr}.hero-card{display:none}.analysis-advice{grid-column:auto}.mini{min-width:0}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="home" class="page active">
+  <div class="header"><div><div class="title">AI 聰明購物小幫手</div><div class="subtitle">控制預算，先買真正需要的</div></div></div>
+  <div class="home-center">
+    <div>
+      <h2 style="font-size:2rem">今天也要聰明買！</h2>
+      <p class="subtitle">先設定預算與必買類別，再讓 AI 協助記錄商品。</p>
+      <div class="home-actions">
+        <button class="primary" onclick="goPage('setup')">開始購物</button>
+        <button onclick="startStory()">情境說明</button>
+        <button onclick="startGuide()">操作說明</button>
+        <button onclick="goPage('tools')">系統工具</button>
+      </div>
+    </div>
+    <div class="hero-card"><div class="hero-icon">🛒🤖</div><p>避免超出預算，也別忘了真正需要買的商品。</p></div>
+  </div>
+</section>
+
+<section id="setup" class="page">
+  <div class="header"><button class="ghost" onclick="returnHome()">← 回首頁</button><div class="title">購物設定</div><div style="width:98px"></div></div>
+  <div class="setup-grid">
+    <div class="box">
+      <h2>① 設定購物預算</h2>
+      <div class="budget-row"><button onclick="changeBudget(-100)">-100</button><div class="budget-value">$<span id="budgetValue">500</span></div><button onclick="changeBudget(100)">+100</button></div>
+      <p class="note">使用固定增減，較容易轉成 Scratch 程式。</p>
+    </div>
+    <div class="box">
+      <h2>② 選擇至少三項必買類別</h2>
+      <div class="cat-grid" id="mustGrid"></div>
+      <div class="status-line" id="mustStatus"></div>
+      <div class="bottom-action"><button id="enterShopping" class="primary" onclick="enterShopping()">開始購物</button></div>
+    </div>
+  </div>
+</section>
+
+<section id="shopping" class="page">
+  <div class="header"><button class="ghost" onclick="returnHome()">← 回首頁</button><div class="title">AI 智慧購物</div><button class="primary" onclick="checkout()">結帳</button></div>
+  <div class="shopping-layout">
+    <div class="top-info"><div class="mini" id="moneyInfo"></div><div class="mini" id="mustInfo"></div></div>
+    <div class="camera-zone">
+      <video id="camera" autoplay playsinline muted></video>
+      <div class="camera-placeholder" id="cameraPlaceholder">攝影機尚未啟動<br>按下方「開始掃描」後開啟鏡頭</div>
+      <div class="scan-safe-label">中央保留給商品圖卡辨識</div>
+    </div>
+    <div class="ai-bar">
+      <div><div class="ai-status" id="aiStatus">請按「開始掃描」</div><div class="progress" id="progressBar"></div></div>
+      <div class="ai-actions" id="aiActions"></div>
+    </div>
+    <div class="sim-row">
+      <div><strong>網頁模擬用分類：</strong><span class="note">實際 Scratch 版由 ML2Scratch 自動輸出分類結果。</span></div>
+      <div class="sim-buttons">
+        <button onclick="setSimClass('主食')">主食</button>
+        <button onclick="setSimClass('蔬果')">蔬果</button>
+        <button onclick="setSimClass('生活用品')">生活用品</button>
+        <button onclick="setSimClass('零食／非必要')">零食／非必要</button>
+        <button onclick="setSimClass('背景')">背景</button>
+      </div>
+    </div>
+    <div class="cart-row">
+      <div class="cart-summary" id="cartSummary"></div>
+      <div style="display:flex;gap:8px"><button onclick="deleteLast()">刪除最後一筆</button><button class="primary" onclick="checkout()">結帳</button></div>
+    </div>
+  </div>
+</section>
+
+<section id="analysis" class="page">
+  <div class="header"><button class="ghost" onclick="returnHome()">← 回首頁</button><div class="title">結帳分析</div><div style="width:98px"></div></div>
+  <div class="analysis-grid">
+    <div class="box"><h2>預算檢查</h2><div id="analysisBudget" style="font-size:1.15rem;line-height:1.8"></div></div>
+    <div class="box"><h2>必買檢查</h2><div id="analysisMust" style="font-size:1.15rem;line-height:1.8"></div></div>
+    <div class="box analysis-advice">
+      <h2>AI 購物建議</h2><div id="analysisAdvice" style="font-size:1.25rem;line-height:1.8;font-weight:700"></div>
+      <div class="analysis-actions"><button onclick="goPage('shopping');renderShopping()">返回修改</button><button class="warn" onclick="restartShopping()">重新購物</button><button class="ghost" onclick="returnHome()">回首頁</button></div>
+    </div>
+  </div>
+</section>
+
+<section id="story" class="page">
+  <div class="header"><div class="title">情境說明</div><button onclick="returnHome()">跳過</button></div>
+  <div class="anim-wrap"><div class="anim-card"><div class="anim-emoji" id="storyEmoji"></div><div class="anim-text" id="storyText"></div><div class="note" id="storyStep"></div></div></div>
+</section>
+
+<section id="guide" class="page">
+  <div class="header"><div class="title">操作說明</div><button onclick="returnHome()">跳過</button></div>
+  <div class="anim-wrap"><div class="anim-card"><div class="anim-emoji" id="guideEmoji"></div><div class="anim-text" id="guideText"></div><div class="anim-actions"><button id="guideNext" class="primary" onclick="nextGuide()">下一步</button></div><div class="note" id="guideStep"></div></div></div>
+</section>
+
+<section id="tools" class="page">
+  <div class="header"><button class="ghost" onclick="returnHome()">← 回首頁</button><div class="title">系統工具</div><div style="width:98px"></div></div>
+  <div class="tools-grid"><div class="box tools-card"><button onclick="fakeLoadModel()">載入模型</button><button onclick="downloadModel()">下載模型</button><button class="primary" onclick="goPage('training');renderTraining()">AI 訓練</button><div class="note">網頁版以模擬資料呈現；實際 Scratch 版可對應 ML2Scratch 的 JSON 模型操作。</div></div></div>
+</section>
+
+<section id="training" class="page">
+  <div class="header"><button class="ghost" onclick="returnHome()">← 回首頁</button><div class="title">AI 模型訓練</div><div style="width:98px"></div></div>
+  <div class="training-grid">
+    <div class="camera-zone"><video id="trainingCamera" autoplay playsinline muted></video><div class="camera-placeholder">訓練取樣示意區</div></div>
+    <div class="box">
+      <h2>選擇訓練類別</h2><div class="training-cats" id="trainCats"></div>
+      <div style="margin-top:22px;font-size:1.2rem;line-height:1.8">目前類別：<strong id="trainCurrent">主食</strong><br>樣本數：<strong id="trainCount">0</strong></div>
+      <div class="training-actions"><button onclick="addSample(1)">手動取樣 +1</button><button class="primary" onclick="addSample(20)">連續取樣 +20</button></div>
+      <p class="note" style="margin-top:16px">為降低學生實作難度，本頁只保留類別選擇、樣本數與兩種取樣方式。</p>
+    </div>
+  </div>
+</section>
+
+<div id="toast" class="toast"></div>
+</div>
+
+<script>
+const categories=['主食','蔬果','生活用品','零食／非必要'];
+const prices={'主食':60,'蔬果':50,'生活用品':80,'零食／非必要':40};
+let state=JSON.parse(localStorage.getItem('smartShopState')||'null')||{
+  budget:500,
+  must:{'主食':true,'蔬果':true,'生活用品':true,'零食／非必要':false},
+  counts:{'主食':0,'蔬果':0,'生活用品':0,'零食／非必要':0},
+  history:[],modelLoaded:false,
+  samples:{'主食':0,'蔬果':0,'生活用品':0,'零食／非必要':0,'背景':0},
+  trainCurrent:'主食'
+};
+let stream=null,scanState=0,simClass='主食',candidate='',lastClass='',stableCount=0,timer=null,storyTimer=null,storyIndex=0,guideIndex=0;
+
+function save(){localStorage.setItem('smartShopState',JSON.stringify(state))}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
+function goPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='setup')renderSetup();if(id==='shopping')renderShopping();if(id==='analysis')renderAnalysis()}
+function returnHome(){cancelCurrentScan();clearInterval(storyTimer);goPage('home')}
+function changeBudget(n){state.budget=Math.max(0,state.budget+n);save();renderSetup()}
+function renderSetup(){
+  document.getElementById('budgetValue').textContent=state.budget;
+  const g=document.getElementById('mustGrid');g.innerHTML='';
+  categories.forEach(c=>{const b=document.createElement('button');b.textContent=(state.must[c]?'✓ ':'')+c;b.className='cat-btn'+(state.must[c]?' selected':'');b.onclick=()=>{state.must[c]=!state.must[c];save();renderSetup()};g.appendChild(b)});
+  const n=categories.filter(c=>state.must[c]).length;
+  document.getElementById('mustStatus').textContent=n>=3?'✓ 設定完成，可以開始購物':`已選擇 ${n} / 3，還需要再選 ${3-n} 類`;
+  document.getElementById('enterShopping').disabled=!(state.budget>0&&n>=3);
+}
+function enterShopping(){if(state.budget<=0||categories.filter(c=>state.must[c]).length<3)return;goPage('shopping')}
+function totalSpent(){return state.history.reduce((s,c)=>s+prices[c],0)}
+function renderShopping(){
+  document.getElementById('moneyInfo').innerHTML=`<strong>購物狀態</strong><br>預算：$${state.budget}<br>已花：$${totalSpent()}<br>剩餘：$${state.budget-totalSpent()}`;
+  const musts=categories.filter(c=>state.must[c]),done=musts.filter(c=>state.counts[c]>0),missing=musts.filter(c=>state.counts[c]===0);
+  document.getElementById('mustInfo').innerHTML=`<strong>必買狀態</strong><br>完成：${done.length} / ${musts.length}<br>${missing.length?`尚缺：${missing.join('、')}`:'✓ 必買已完成'}`;
+  document.getElementById('cartSummary').innerHTML=categories.map(c=>`<span>${c}：${state.counts[c]}件</span>`).join('')+`<span>總金額：$${totalSpent()}</span>`;
+  renderScanUI();
+}
+function renderProgress(){const p=document.getElementById('progressBar');p.innerHTML='';for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='seg'+(i<=stableCount?' on':'');p.appendChild(s)}}
+function renderScanUI(){
+  const status=document.getElementById('aiStatus'),actions=document.getElementById('aiActions');actions.innerHTML='';
+  if(scanState===0){
+    status.textContent='請按「開始掃描」';stableCount=0;renderProgress();
+    const b=document.createElement('button');b.className='primary';b.textContent='開始掃描';b.onclick=startScan;actions.appendChild(b);
+  }else if(scanState===1){
+    status.textContent=`AI辨識：${simClass}　穩定確認 ${stableCount} / 5`;renderProgress();
+  }else if(scanState===2){
+    status.textContent=`✓ 辨識完成：${candidate}　單價 $${prices[candidate]}`;stableCount=5;renderProgress();
+    const yes=document.createElement('button');yes.className='good';yes.textContent='確認加入';yes.onclick=confirmAdd;
+    const no=document.createElement('button');no.textContent='辨識錯誤／重新掃描';no.onclick=cancelCandidate;
+    actions.appendChild(yes);actions.appendChild(no);
+  }else if(scanState===3){
+    status.textContent=`已加入購物車，請移開圖卡　背景確認 ${stableCount} / 5`;renderProgress();
+  }
+}
+async function ensureCamera(){
+  if(stream)return;
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+    document.getElementById('camera').srcObject=stream;
+    document.getElementById('cameraPlaceholder').style.display='none';
+  }catch(e){
+    document.getElementById('cameraPlaceholder').innerHTML='無法開啟攝影機<br>仍可使用下方「網頁模擬用分類」測試流程';
+  }
+}
+async function startScan(){
+  await ensureCamera();scanState=1;candidate='';lastClass='';stableCount=0;clearInterval(timer);
+  timer=setInterval(()=>{
+    if(scanState!==1){clearInterval(timer);return}
+    if(simClass==='背景'){stableCount=0;lastClass='';renderScanUI();return}
+    if(simClass===lastClass)stableCount++;else{lastClass=simClass;stableCount=1}
+    if(stableCount>=5){candidate=simClass;scanState=2;clearInterval(timer)}
+    renderScanUI();
+  },500);
+  renderScanUI();
+}
+function setSimClass(c){
+  simClass=c;
+  if(scanState===1&&c!==lastClass){lastClass='';stableCount=0}
+  if(scanState===3&&c!=='背景'){stableCount=0;renderScanUI()}
+}
+function confirmAdd(){
+  if(!candidate)return;
+  state.counts[candidate]++;state.history.push(candidate);save();scanState=3;stableCount=0;lastClass='';clearInterval(timer);
+  timer=setInterval(()=>{
+    if(scanState!==3){clearInterval(timer);return}
+    if(simClass==='背景')stableCount++;else stableCount=0;
+    if(stableCount>=5){clearInterval(timer);scanState=0;stableCount=0;candidate='';toast('🔓 已解鎖，可以掃描下一件商品')}
+    renderShopping();
+  },500);
+  renderShopping();
+}
+function cancelCandidate(){candidate='';stableCount=0;lastClass='';scanState=0;renderShopping();toast('本次辨識已取消，請調整圖卡後重新掃描')}
+function cancelCurrentScan(){clearInterval(timer);scanState=0;candidate='';stableCount=0;lastClass=''}
+function deleteLast(){
+  if(!state.history.length){toast('目前沒有可刪除的商品');return}
+  const c=state.history.pop();state.counts[c]=Math.max(0,state.counts[c]-1);save();renderShopping();toast(`已刪除最後一筆：${c}`)
+}
+function checkout(){if(!state.history.length){toast('尚未加入任何商品');return}cancelCurrentScan();goPage('analysis')}
+function renderAnalysis(){
+  const spent=totalSpent(),remain=state.budget-spent;
+  document.getElementById('analysisBudget').innerHTML=`預算：$${state.budget}<br>已花：$${spent}<br>${remain>=0?`✓ 沒有超出預算<br>剩餘：$${remain}`:`⚠ 已超出預算<br>超出：$${Math.abs(remain)}`}`;
+  const musts=categories.filter(c=>state.must[c]),missing=musts.filter(c=>state.counts[c]===0);
+  document.getElementById('analysisMust').innerHTML=musts.map(c=>`${state.counts[c]>0?'✓':'✗'} ${c}`).join('<br>')+`<br><br>完成：${musts.length-missing.length} / ${musts.length}`;
+  let advice='',over=spent>state.budget,allDone=missing.length===0;
+  if(!over&&allDone)advice='很棒！沒有超出預算，而且必買商品都完成了。';
+  else if(!over&&!allDone)advice=`預算控制得不錯，但還缺：${missing.join('、')}。建議先補齊必買商品。`;
+  else if(over&&allDone)advice='必買商品都完成了，但已超出預算，建議刪除部分非必要商品。';
+  else advice=`目前已超出預算，而且還缺：${missing.join('、')}。建議重新調整購物內容。`;
+  document.getElementById('analysisAdvice').textContent=advice;
+}
+function restartShopping(){categories.forEach(c=>state.counts[c]=0);state.history=[];save();cancelCurrentScan();goPage('setup');toast('已清空本次購物紀錄，請重新確認設定')}
+
+const storySlides=[['🛍️','看到喜歡的商品就一直放進購物車。'],['💸','結帳時才發現超出預算，而且真正需要的東西還沒買。'],['🤖','AI 聰明購物小幫手登場：記錄商品、控制預算、提醒必買。']];
+function startStory(){clearInterval(storyTimer);storyIndex=0;goPage('story');renderStory();storyTimer=setInterval(()=>{storyIndex++;if(storyIndex>=storySlides.length){clearInterval(storyTimer);returnHome();return}renderStory()},2600)}
+function renderStory(){document.getElementById('storyEmoji').textContent=storySlides[storyIndex][0];document.getElementById('storyText').textContent=storySlides[storyIndex][1];document.getElementById('storyStep').textContent=`第 ${storyIndex+1} 幕 / ${storySlides.length}`}
+
+const guideSlides=[['💰','STEP 1　設定預算與至少三項必買類別。'],['📷','STEP 2　按「開始掃描」，將商品圖卡對準鏡頭。'],['✅','STEP 3　等待 5 次穩定確認，再選擇「確認加入」或「重新掃描」。'],['🧾','STEP 4　移開圖卡完成解鎖；購物完成後進行結帳分析。']];
+function startGuide(){guideIndex=0;goPage('guide');renderGuide()}
+function renderGuide(){document.getElementById('guideEmoji').textContent=guideSlides[guideIndex][0];document.getElementById('guideText').textContent=guideSlides[guideIndex][1];document.getElementById('guideStep').textContent=`${guideIndex+1} / ${guideSlides.length}`;document.getElementById('guideNext').textContent=guideIndex===guideSlides.length-1?'完成':'下一步'}
+function nextGuide(){if(guideIndex===guideSlides.length-1){returnHome();return}guideIndex++;renderGuide()}
+
+function fakeLoadModel(){state.modelLoaded=true;save();toast('✓ 模型載入完成（網頁模擬）')}
+function downloadModel(){
+  const blob=new Blob([JSON.stringify({samples:state.samples,modelLoaded:true},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='smart-shopping-model-sim.json';a.click();URL.revokeObjectURL(a.href);
+}
+function renderTraining(){
+  const g=document.getElementById('trainCats');g.innerHTML='';
+  [...categories,'背景'].forEach(c=>{const b=document.createElement('button');b.textContent=c;b.className=state.trainCurrent===c?'active':'';b.onclick=()=>{state.trainCurrent=c;save();renderTraining()};g.appendChild(b)});
+  document.getElementById('trainCurrent').textContent=state.trainCurrent;document.getElementById('trainCount').textContent=state.samples[state.trainCurrent]||0;
+}
+function addSample(n){state.samples[state.trainCurrent]=(state.samples[state.trainCurrent]||0)+n;save();renderTraining()}
+
+renderSetup();renderProgress();renderShopping();
+</script>
+</body>
+</html>
